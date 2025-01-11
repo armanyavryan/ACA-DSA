@@ -61,6 +61,21 @@ struct Node {
 			return node;
 		}
 	}
+
+
+	void flipRecursive() {
+		auto l = this->leftNode;
+		this->leftNode = this->rightNode;
+		this->rightNode = l;
+
+		if (this->leftNode) {
+			this->leftNode->flipRecursive();
+		}
+
+		if (this->rightNode) {
+			this->rightNode->flipRecursive();
+		}
+	}
 };
 
 struct BinaryTree {
@@ -88,6 +103,11 @@ public:
 
 	const Node* search(int value) const {
 		return m_root->search(value);
+	}
+
+	void flipRecursive() {
+		if (!m_root) { return; }
+		m_root->flipRecursive();
 	}
 
 	void remove(Node* node) {
@@ -469,10 +489,64 @@ void test_remove() {
 
 }
 
+void test_flip_loop() {
+	BinaryTree tree;
+	int values[] = { 100, 50, 150, 25, 125, 175, 75, 9, 63, 80, 35 };
+	int len = sizeof(values) / sizeof(int);
+	for (size_t i = 0; i < len; i++)
+	{
+		tree.insert(values[i]);
+	}
+
+	std::cout << __FUNCTION__ << ": TEST START : Normal Tree" << std::endl;
+
+	tree.print();
+	std::cout << __FUNCTION__ << ": Flipped Tree" << std::endl;
+
+	std::queue<Node*> queue;
+
+	queue.push(const_cast<Node*> (tree.getRootNode()));
+
+	while (!queue.empty()) {
+		auto n = queue.front();
+		queue.pop();
+		if (n->leftNode) { queue.push(n->leftNode); }
+		if (n->rightNode) { queue.push(n->rightNode); }
+
+		auto temp = n->rightNode;
+		n->rightNode = n->leftNode;
+		n->leftNode = temp;
+	}
+
+	tree.print();
+	std::cout << __FUNCTION__ << ": TEST END " << std::endl;
+}
+
+void test_flip() {
+	BinaryTree tree;
+	int values[] = { 100, 50, 150, 25, 125, 175, 75, 9, 63, 80, 35 };
+	int len = sizeof(values) / sizeof(int);
+	for (size_t i = 0; i < len; i++)
+	{
+		tree.insert(values[i]);
+	}
+
+	std::cout << __FUNCTION__ << ": TEST START : Normal Tree" << std::endl;
+
+	tree.print();
+	std::cout << __FUNCTION__ << ": Flipped Tree" << std::endl;
+
+	tree.flipRecursive();
+	tree.print();
+	std::cout << __FUNCTION__ << ": TEST END " << std::endl;
+}
+
 int main()
 {
-	test_search();
-	test_is_binary_tree();
-	test_MinAndMax();
-	test_remove();
+	//test_search();
+	//test_is_binary_tree();
+	//test_MinAndMax();
+	//test_remove();
+	test_flip();
+	test_flip_loop();
 }
