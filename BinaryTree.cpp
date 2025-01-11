@@ -5,6 +5,7 @@
 #include<numeric>
 #include<tuple>
 #include<string>
+#include <random>
 
 struct Node {
 	int value;
@@ -89,20 +90,61 @@ public:
 		return m_root->search(value);
 	}
 
-	const Node* min() {
-		if (!m_root) { return nullptr; }
+	void remove(Node* node) {
+		if (!node) { return; }
+		
+		Node* substituteNode = nullptr;
+		if (node->leftNode) {
+			substituteNode = const_cast<Node*> (BinaryTree::max(node->leftNode));
+		}
+		else if (node->rightNode) {
+			substituteNode = const_cast<Node*> (BinaryTree::min(node->rightNode));
+		}
+		if (!substituteNode) { return; }
 
-		Node* node = m_root;
+		node->value = substituteNode->value;
+
+		if (!substituteNode->parent) { return; }
+		
+		if (substituteNode->parent->leftNode == substituteNode) {
+			substituteNode->parent->leftNode = nullptr;
+		}
+		else if (substituteNode->parent->rightNode == substituteNode) {
+			substituteNode->parent->rightNode = nullptr;
+		}
+		
+		
+		node->leftNode	= substituteNode->leftNode;
+		node->rightNode = substituteNode->rightNode;
+		if (node->leftNode) {
+			node->leftNode->parent = node;
+		}
+		if (node->rightNode)
+		{
+			node->rightNode->parent = node;
+		}
+		
+		substituteNode->leftNode = nullptr;
+		substituteNode->rightNode= nullptr;
+
+		delete substituteNode;
+
+	}
+
+	static const Node* min(const Node* root) {
+		if (!root) { return nullptr; }
+
+		const Node* node = root;
 		while (node->leftNode) {
 			node = node->leftNode;
 		}
 		return node;
 	}
 
-	const Node* max() {
-		if (!m_root) { return nullptr; }
+	static const Node* max(const Node* root) {
+		if (!root) { return nullptr; }
 
-		Node* node = m_root;
+		const Node* node = root;
 		while (node->rightNode) {
 			node = node->rightNode;
 		}
@@ -229,6 +271,7 @@ public:
 		std::cout << std::endl;
 	}
 
+
 	static bool recursiveCheck(const Node* node,
 		int leftLimit = std::numeric_limits<int>::min(),
 		int rightLimit = std::numeric_limits<int>::max())
@@ -279,7 +322,6 @@ void generateInvalidBinaryTree(BinaryTree& tree) {
 	//return tree;
 }
 
-#include <random>
 
 void test_MinAndMax() {
 	BinaryTree tree;
@@ -311,8 +353,8 @@ void test_MinAndMax() {
 	std::cout << std::endl;
 
 	
-	auto minNode = tree.min();
-	auto maxNode = tree.max();
+	auto minNode = BinaryTree::min(tree.getRootNode());
+	auto maxNode = BinaryTree::max(tree.getRootNode());
 	if (minNode && (minNode->value == min)) {
 		tree.printAndTag(min);
 		std::cout << __FUNCTION__ << " MIN TEST PASSED " << std::endl;
@@ -406,10 +448,31 @@ void test_is_binary_tree() {
 
 }
 
+void test_remove() {
+	BinaryTree tree;
+	int values[] = { 50, 30, 22, 49, 68, 54, 10, 3, 49, 6 };
+	int len = sizeof(values) / sizeof(int);
+	for (size_t i = 0; i < len; i++)
+	{
+		tree.insert(values[i]);
+	}
+	int removedValue = 22;
+	std::cerr << __FUNCTION__ << " START TEST : Remove value " << removedValue << std::endl;
+
+	tree.printAndTag(removedValue);
+	auto c_node = tree.search(removedValue);
+	Node* node = const_cast<Node*>(c_node);
+	tree.remove(node);
+	tree.print();
+
+	std::cout << __FUNCTION__ << ": TEST END " << std::endl;
+
+}
 
 int main()
 {
 	test_search();
 	test_is_binary_tree();
 	test_MinAndMax();
+	test_remove();
 }
