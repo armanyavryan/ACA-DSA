@@ -79,15 +79,18 @@ public:
     void normalRehash(){
 
         std::vector<std::pair<T, bool> > newTable;
-        newTable.resize(m_table.size() * m_scaleFactor);
+        newTable.resize(size_t(m_table.size() * m_scaleFactor));
         for (int i = 0; i < m_table.size(); ++i) {
             if(!m_table[i].second){continue;}
             auto hash = m_f(m_table[i].first);
             int index = hash % newTable.size();
 
             while(newTable[index].second){
-                // occupied, find closest cell
+                // occupied, find closest empty cell
                 index ++;
+                if (index == newTable.size()) {
+                    index = 0;
+                }
             }
             newTable[index].first = m_table[i].first;
             newTable[index].second = true;
@@ -201,6 +204,18 @@ public:
 
         std::cout << " loadFactor " << loadFactor() << std::endl;
     }
+
+    void printOneLine() {
+        std::cout << "table{";
+        for (int i = 0; i < m_table.size(); ++i) {
+                std::cout << (m_table[i].second ? '*' : ' ');
+        }
+
+        std::cout << "}";
+        std::cout << std::endl << " loadFactor " << loadFactor() << std::endl;
+    }
+
+
 
     void setRehashLoadFactor(float newRehashLoadFactor){
         if(newRehashLoadFactor > 0.25 && newRehashLoadFactor < 1 ){

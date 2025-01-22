@@ -146,6 +146,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Assignment.h" />
     <ClInclude Include="HashTable.h" />
     <ClInclude Include="OpenAddressingHashTable.h" />
     <ClInclude Include="Test.h" />
